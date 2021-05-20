@@ -39,7 +39,7 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
     def __init__(self,  # pylint: disable=too-many-arguments
                  mode='auto', replaygain_preamp_gain=0.0,
                  transcode=True, copy_tags=True,
-                 bitrate="192k",
+                 bitrate="192", var_bitrate=None,
                  albumartist_artist_hack=False,
                  albumartist_composer_hack=False,
                  artist_albumartist_hack=False,
@@ -47,7 +47,12 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
                  tracknumber_hack=False):
         self.name = "Processing"
         self._format = "mp3"
+        self._format_string = self._format
         self._bitrate = bitrate
+        self._bitrate_string = self._bitrate
+        self._var_bitrate = var_bitrate
+
+        self.get_transcode_bitrate()
 
         logger.info("Transcoding settings:")
         logger.info(
@@ -60,8 +65,8 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
         self._transcode = transcode
         if transcode and mode in ['auto', 'transcode', 'replaygain',
                                   'replaygain-album']:
-            logger.info(" - Converting to {} in with a bitrate of {}".format(
-                self._format, self._bitrate))
+            logger.info(" - Converting to {} in with {}".format(
+                self._format_string, self._bitrate_string))
             self._replaygain_preamp_gain = replaygain_preamp_gain
             if mode.startswith('replaygain') and replaygain_preamp_gain != 0.0:
                 logger.info(" - Applying ReplayGain pre-amp gain {}".format(
@@ -95,6 +100,34 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
     def get_out_filename(self, path):
         """Determine output file path."""
         return os.path.splitext(path)[0] + '.' + self._format
+
+    def get_transcode_bitrate(self):
+        """Select between CBR and VBR and set the displayed strings accordingly"""
+        if self._var_bitrate is not None:
+            var_bitrate_dict = {
+                "0": ["245", "220-260"],
+                "1": ["225", "190-250"],
+                "2": ["190", "170-210"],
+                "3": ["175", "150-195"],
+                "4": ["165", "140-185"],
+                "5": ["130", "120-150"],
+                "6": ["115", "100-130"],
+                "7": ["100", "80-120"],
+                "8": ["85", "70-105"],
+                "9": ["65", "45-85"]
+            }
+
+            self._bitrate = None
+            self._format_string = self._format + " VBR"
+
+            self._bitrate_string = "an average bitrate of {} kbit/s \
+                                    and a bitrate range between {} kbit/s".format(
+                var_bitrate_dict[self._var_bitrate][0],
+                var_bitrate_dict[self._var_bitrate][1])
+        else:
+            self._format_string = self._format + " CBR"
+            self._bitrate_string = "a bitrate of of {} kbit/s".format(self._bitrate)
+            self._bitrate += 'k'
 
     def execute(self, in_filepath, out_filepath):
         """Executes action."""
@@ -143,16 +176,17 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
             in_file = AudioSegment.from_file(
                 in_filepath, os.path.splitext(in_filepath)[1][1:])
             if not self._mode.startswith('replaygain'):
-                in_file.export(
-                    out_filepath, format=self._format, bitrate=self._bitrate)
+                self.export_audio_file(
+                    export_file=in_file,
+                    export_filepath=out_filepath,
+                    in_parameters=[])
             else:
                 rp_info = self.get_replaygain(in_filepath)
                 if rp_info:
-                    in_file.export(
-                        out_filepath,
-                        format=self._format,
-                        bitrate=self._bitrate,
-                        parameters=[
+                    self.export_audio_file(
+                        export_file=in_file,
+                        export_filepath=out_filepath,
+                        in_parameters=[
                             "-metadata", "REPLAYGAIN_TRACK_GAIN={}".format(
                                 rp_info.gain + self._replaygain_preamp_gain),
                             "-metadata", "REPLAYGAIN_TRACK_PEAK={}".format(
@@ -160,13 +194,29 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
                         ])
                 else:
                     logger.warning("No ReplayGain info found {}", in_filepath)
-                    in_file.export(
-                        out_filepath, format=self._format, bitrate=self._bitrate)
+                    self.export_audio_file(
+                        export_file=in_file,
+                        export_filepath=out_filepath,
+                        in_parameters=[])
         except (exceptions.CouldntDecodeError,
                 exceptions.CouldntEncodeError,
                 PermissionError) as err:
             raise IOError("Failed to transcode file {}: {}"
                           .format(in_filepath, err)) from err
+
+    def export_audio_file(self, export_file, export_filepath, in_parameters):
+        """Convert and export the loaded AudioSegment; helper function for transcode()"""
+        if self._var_bitrate is not None:
+            export_file.export(
+                export_filepath,
+                format=self._format,
+                parameters=in_parameters + ["-q:a", self._var_bitrate])
+        else:
+            export_file.export(
+                export_filepath,
+                format=self._format,
+                bitrate=self._bitrate,
+                parameters=in_parameters)
 
     def copy_tags(self, in_filepath, out_filepath):
         """Copy tags."""

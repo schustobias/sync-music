@@ -87,8 +87,18 @@ the destination)::
     sync_music --audio-src=<FOLDER> --audio-dest=<FOLDER> --mode=transcode
 
 Transcoding MP3 files can lead to significantly smaller files if the source
-contains many 320kbps CBR MP3s as the target rate is 192kbps ABR. The drawback
-is that transcoding is slower and needs more CPU power.
+contains many 320kbps CBR MP3s as the default target rate is 192kbps CBR.
+The drawback is that transcoding is slower and needs more CPU power.
+
+To change the bitrate use::
+
+    sync_music --audio-src=<FOLDER> --audio-dest=<FOLDER> --bitrate=<BITRATE>
+
+To export using a variable bitrate use::
+
+    sync_music --audio-src=<FOLDER> --audio-dest=<FOLDER> --varbitrate=<QUALITY>
+
+Note: When using both the --bitrate and --varbitrate parameter, --bitrate gets ignored
 
 The *replaygain* and *replaygain-album* modes apply (track or album) based
 volume normalization from ReplayGain_ tags when transcoding::
