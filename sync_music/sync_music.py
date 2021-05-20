@@ -63,6 +63,7 @@ class SyncMusic():
             replaygain_preamp_gain=self._args.replaygain_preamp_gain,
             transcode=not self._args.disable_file_processing,
             copy_tags=not self._args.disable_tag_processing,
+            bitrate=str(self._args.bitrate)+"k",
             albumartist_artist_hack=self._args.albumartist_artist_hack,
             albumartist_composer_hack=self._args.albumartist_composer_hack,
             artist_albumartist_hack=self._args.artist_albumartist_hack,
@@ -289,6 +290,11 @@ def load_settings(arguments=None):  # pylint: disable=too-many-locals
              "based normalization and adapt tags (slow), "
              "copy: copy all files, leave tags untouched (implies "
              "--disable-tag-processing)")
+    parser_audio.add_argument(
+        '--bitrate', type=int,
+        default=192,
+        help="Desired bitrate for the transcoded files "
+             "(number in kbit/s)")
     parser_audio.add_argument(
         '--replaygain-preamp-gain', type=float,
         default=4.0,

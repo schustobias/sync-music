@@ -39,6 +39,7 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
     def __init__(self,  # pylint: disable=too-many-arguments
                  mode='auto', replaygain_preamp_gain=0.0,
                  transcode=True, copy_tags=True,
+                 bitrate="192k",
                  albumartist_artist_hack=False,
                  albumartist_composer_hack=False,
                  artist_albumartist_hack=False,
@@ -46,7 +47,7 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
                  tracknumber_hack=False):
         self.name = "Processing"
         self._format = "mp3"
-        self._bitrate = "192k"
+        self._bitrate = bitrate
 
         logger.info("Transcoding settings:")
         logger.info(

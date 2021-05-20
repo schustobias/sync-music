@@ -188,6 +188,10 @@ class TestSyncMusicFiles():
         """Test reference folder with file processing only."""
         self._execute_sync_music(arguments=['--disable-tag-processing'])
 
+    def test_reference_bitrate(self):
+        """Test reference folder with file processing only."""
+        self._execute_sync_music(arguments=['--bitrate',192])
+
     def test_reference_hacks(self):
         """Test reference folder with hacks."""
         self._execute_sync_music(arguments=[
