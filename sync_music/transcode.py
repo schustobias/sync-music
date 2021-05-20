@@ -65,7 +65,7 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
         self._transcode = transcode
         if transcode and mode in ['auto', 'transcode', 'replaygain',
                                   'replaygain-album']:
-            logger.info(" - Converting to {} in with {}".format(
+            logger.info(" - Converting to {} with {}".format(
                 self._format_string, self._bitrate_string))
             self._replaygain_preamp_gain = replaygain_preamp_gain
             if mode.startswith('replaygain') and replaygain_preamp_gain != 0.0:
@@ -120,10 +120,11 @@ class Transcode:  # pylint: disable=too-many-instance-attributes
             self._bitrate = None
             self._format_string = self._format + " VBR"
 
-            self._bitrate_string = "an average bitrate of {} kbit/s \
-                                    and a bitrate range between {} kbit/s".format(
-                var_bitrate_dict[self._var_bitrate][0],
-                var_bitrate_dict[self._var_bitrate][1])
+            self._bitrate_string = \
+                "an average bitrate of {} kbit/s " \
+                "and a bitrate range between {} kbit/s".format(
+                    var_bitrate_dict[self._var_bitrate][0],
+                    var_bitrate_dict[self._var_bitrate][1])
         else:
             self._format_string = self._format + " CBR"
             self._bitrate_string = "a bitrate of of {} kbit/s".format(self._bitrate)
