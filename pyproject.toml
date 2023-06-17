@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "sync-music"
+version = "0.1.0"
+description = "aaa"
+repository = "https://github.com/schustobias/sync-music"
+authors = ["Tobias Schuster <102374869+schustobias@users.noreply.github.com>"]
+license = "GNU"
+readme = "README.md"
+keywords = ["music", "synchronization"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+]
+packages = [{include = "sync_music", from = "src"}]
+
+[tool.poetry.scripts]
+sync-music = 'sync_music.sync_music:main'
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mutagen = "^1.46.0"
+pydub = "^0.25.1"
+
+[tool.poetry.group.dev.dependencies]
+tox = "^4.6.2"
+pylint = "^2.17.4"
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
